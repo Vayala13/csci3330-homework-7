@@ -1,0 +1,12 @@
+{
+  "name": "3330-homework-7",
+  "version": "1.0.0",
+  "description": "CSCI 3330 Homework 7 admin dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
