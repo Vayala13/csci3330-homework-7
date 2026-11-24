@@ -39,6 +39,22 @@ app.get("/api/stats", async (req, res) => {
     }
 });
 
+app.get("/api/sales", async (req, res) => {
+    try {
+        const sales = await pool.query(`
+            SELECT products.name, sales.quantity, sales.saleamount
+            FROM sales
+            LEFT JOIN products ON
+            sales.productid = products.id
+            ORDER BY sales.id ASC
+        `);
+
+        res.json(sales.rows);
+    } catch (error) {
+        res.status(500).json({ error: "Could not load sales" });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });

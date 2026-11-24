@@ -26,24 +26,6 @@ $(function () {
         }
     ];
 
-    const sales = [
-        {
-            "product": "Product A",
-            "quantity": "124",
-            "revenue": "$12,400"
-        },
-        {
-            "product": "Product B",
-            "quantity": "98",
-            "revenue": "$9,800"
-        },
-        {
-            "product": "Product C",
-            "quantity": "75",
-            "revenue": "$7,500"
-        },
-    ];
-
     const activities = [
         {
             "message" : "New customer registered"
@@ -136,18 +118,25 @@ $(function () {
     });
 
    
-    const salesTableBody = $("#salesTableBody");
+    $.getJSON("/api/sales", function (sales) {
+        const salesTableBody = $("#salesTableBody");
 
-    sales.forEach(sale => {
-        const row = $("<tr>");
+        sales.forEach(sale => {
+            const revenue = Number(sale.saleamount).toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+                maximumFractionDigits: 0,
+            });
+            const row = $("<tr>");
 
-        row.html(`
-            <td>${sale.product}</td>
-            <td>${sale.quantity}</td>
-            <td>${sale.revenue}</td>
-        `);
+            row.html(`
+                <td>${sale.name}</td>
+                <td>${sale.quantity}</td>
+                <td>${revenue}</td>
+            `);
 
-        salesTableBody.append(row);
+            salesTableBody.append(row);
+        });
     });
 
     const activityList = $("#activity-list");
