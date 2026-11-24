@@ -41,39 +41,6 @@ $(function () {
         }
     ];
 
-    const messages = [
-        {
-            "messsage" : "All systems operational"
-        },
-        {
-            "messsage" : "All settings loaded for this system"
-        }
-    ];
-
-    const notifications = [
-        {
-            "messsage": "A new shipment is expected to arrive on Sep 30, 2026"
-        },
-        {
-            "messsage": "There are 12 outstanding issues with last week's orders"
-        },
-        {
-            "messsage": "Three new customers joined our platform in the last month"
-        },
-    ];
-
-    const tasks = [
-       {
-            "messsage": "Review orders"
-        },
-        {
-            "messsage": "Contact customer"
-        },
-        {
-            "messsage": "Generate report"
-        },
-    ]
-
     // There are 13 requirements to implement. 
     const userNameObj = $("#username");
     userNameObj.append(`${username}`);
@@ -148,30 +115,25 @@ $(function () {
     });
 
  
-    const systemStatusList = $("#system-status-list");
+    function fillAlertList(selector, rows) {
+        const list = $(selector);
 
-    messages.forEach(msg => {
-        const li = $("<li>");
-        li.html(`${msg.messsage}`);
-        systemStatusList.append(li);
-    });
+        rows.forEach(row => {
+            const li = $("<li>");
+            li.text(row.description);
+            list.append(li);
+        });
+    }
 
-
-    const notificationsList = $("#notifications-list");
-
-    notifications.forEach(notif => {
-        const li = $("<li>");
-        li.html(`${notif.messsage}`);
-        notificationsList.append(li);
-    });
-
-
-    const tasksList = $("#tasks-list");
-
-    tasks.forEach(task => {
-        const li = $("<li>");
-        li.html(`${task.messsage}`);
-        tasksList.append(li);
+    $.when(
+        $.getJSON("/api/alerts/issues"),
+        $.getJSON("/api/alerts/notifications"),
+        $.getJSON("/api/alerts/tasks")
+    ).done(function (issues, notifications, tasks) {
+        fillAlertList("#system-status-list", issues[0]);
+        fillAlertList("#notifications-list", notifications[0]);
+        fillAlertList("#tasks-list", tasks[0]);
+        $("#accordion").accordion("refresh");
     });
 
 

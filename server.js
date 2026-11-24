@@ -55,6 +55,33 @@ app.get("/api/sales", async (req, res) => {
     }
 });
 
+app.get("/api/alerts/issues", async (req, res) => {
+    try {
+        const issues = await pool.query("SELECT * FROM alerts WHERE type = 'issues'");
+        res.json(issues.rows);
+    } catch (error) {
+        res.status(500).json({ error: "Could not load issues" });
+    }
+});
+
+app.get("/api/alerts/notifications", async (req, res) => {
+    try {
+        const notifications = await pool.query("SELECT * FROM alerts WHERE type = 'notifications'");
+        res.json(notifications.rows);
+    } catch (error) {
+        res.status(500).json({ error: "Could not load notifications" });
+    }
+});
+
+app.get("/api/alerts/tasks", async (req, res) => {
+    try {
+        const tasks = await pool.query("SELECT * FROM alerts WHERE type = 'tasks'");
+        res.json(tasks.rows);
+    } catch (error) {
+        res.status(500).json({ error: "Could not load tasks" });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });
