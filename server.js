@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const { Pool } = require("pg");
 
 const app = express();
@@ -14,9 +15,7 @@ const pool = new Pool({
 
 app.locals.pool = pool;
 
-app.get("/", (req, res) => {
-    res.send("Express app is running.");
-});
+app.use(express.static(path.join(__dirname, "public")));
 
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
