@@ -5,42 +5,6 @@ $(function () {
 
     let username = "UTRGV Vaqueros";
 
-    const customers = [
-        {
-            "name": "Alice Johnson",
-            "email": "alice@example.com",
-            "status": "Active",
-            "joined": "09/10/2026"
-        },
-        {
-            "name": "Robert Smith",
-            "email": "robert@example.com",
-            "status": "Pending",
-            "joined": "09/12/2026"
-        },
-        {
-            "name": "Maria Garcia",
-            "email": "maria@example.com",
-            "status": "Active",
-            "joined": "09/15/2026"
-        }
-    ];
-
-    const activities = [
-        {
-            "message" : "New customer registered"
-        },
-        {
-            "message" : "Order #10482 completed"
-        },
-        {
-            "message" : "Payment received"
-        },
-        {
-            "message" : "Support ticket created"
-        }
-    ];
-
     // There are 13 requirements to implement. 
     const userNameObj = $("#username");
     userNameObj.append(`${username}`);
@@ -59,32 +23,75 @@ $(function () {
         $("#notification-num").text(stats.notifications);
     });
 
-    const tableBody = $("#customerTableBody");
+    function formatJoined(value) {
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+            return value;
+        }
 
-    customers.forEach(customer => {
-        const row = $("<tr>");
+        const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+        const day = String(date.getUTCDate()).padStart(2, "0");
+        return `${month}/${day}/${date.getUTCFullYear()}`;
+    }
 
-        var statusClass;
-            if (customer.status.toLowerCase() === "active"){
-                statusClass = "status-active";
-            } else {
-                statusClass = "status-pending";
-            }
-        row.html(`
-            <td>${customer.name}</td>
-            <td>${customer.email}</td>
-            <td>
-                <span class="status ${statusClass}">
-                    ${customer.status}
-                </span>
-            </td>
-            <td>${customer.joined}</td>
-        `);
+    function renderCustomerPage(data) {
+        const tableBody = $("#customerTableBody");
+        tableBody.empty();
 
-        tableBody.append(row);
-    });
+        data.customers.forEach(customer => {
+            const statusClass = customer.status === "active" ? "status-active" : "status-pending";
+            const statusLabel = customer.status.charAt(0).toUpperCase() + customer.status.slice(1);
+            const row = $("<tr>");
 
-   
+            row.append($("<td>").text(customer.name));
+            row.append($("<td>").text(customer.email));
+            row.append(
+                $("<td>").append(
+                    $("<span>").addClass("status " + statusClass).text(statusLabel)
+                )
+            );
+            row.append($("<td>").text(formatJoined(customer.datejoined)));
+            tableBody.append(row);
+        });
+
+        const pager = $("#customerPagination");
+        pager.empty();
+
+        const previous = $("<a href='#'>Previous</a>");
+        const current = $("<a href='#' class='active'></a>").text(data.page + " of " + data.totalPages);
+        const next = $("<a href='#'>Next</a>");
+
+        if (data.page <= 1) {
+            previous.addClass("disabled");
+        } else {
+            previous.on("click", function (event) {
+                event.preventDefault();
+                loadCustomers(data.page - 1);
+            });
+        }
+
+        current.on("click", function (event) {
+            event.preventDefault();
+        });
+
+        if (data.page >= data.totalPages) {
+            next.addClass("disabled");
+        } else {
+            next.on("click", function (event) {
+                event.preventDefault();
+                loadCustomers(data.page + 1);
+            });
+        }
+
+        pager.append(previous, current, next);
+    }
+
+    function loadCustomers(page) {
+        $.getJSON("/api/customers", { page: page }, renderCustomerPage);
+    }
+
+    loadCustomers(1);
+
     $.getJSON("/api/sales", function (sales) {
         const salesTableBody = $("#salesTableBody");
 
@@ -106,15 +113,6 @@ $(function () {
         });
     });
 
-    const activityList = $("#activity-list");
-
-    activities.forEach(activity => {
-        const li = $("<li>");
-        li.html(`${activity.message}`);
-        activityList.append(li);
-    });
-
- 
     function fillAlertList(selector, rows) {
         const list = $(selector);
 

@@ -55,6 +55,31 @@ app.get("/api/sales", async (req, res) => {
     }
 });
 
+app.get("/api/customers", async (req, res) => {
+    try {
+        const pageSize = 10;
+        const page = Math.max(Number(req.query.page) || 1, 1);
+        const offset = (page - 1) * pageSize;
+
+        const customers = await pool.query(
+            "SELECT * FROM customers ORDER BY id LIMIT $1 OFFSET $2",
+            [pageSize, offset]
+        );
+        const totalResult = await pool.query("SELECT count(*) FROM customers");
+        const total = Number(totalResult.rows[0].count);
+
+        res.json({
+            customers: customers.rows,
+            page,
+            pageSize,
+            total,
+            totalPages: Math.ceil(total / pageSize),
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Could not load customers" });
+    }
+});
+
 app.get("/api/alerts/issues", async (req, res) => {
     try {
         const issues = await pool.query("SELECT * FROM alerts WHERE type = 'issues'");
